@@ -13,11 +13,7 @@ import{ environment } from './bot-config';
 import getThought, { Thought } from './commands/inspiration';
 import cron from 'node-cron';
 
-const feedUrl = "https://www.thoughtfortoday.org.uk/feed/";
-
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
-
-const commands = [];
 
 client.once('ready', () => {
     console.log('Ready!');
@@ -34,7 +30,6 @@ client.once('ready', () => {
             console.log("Text: " + thought.text);
         });
       });
-
 });
 
 client.login(environment.token);
