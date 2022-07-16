@@ -2,7 +2,7 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Thursday, 2022-07-14 17:20
+ * Last Modified: Saturday, 2022-07-16 7:48
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
@@ -23,8 +23,8 @@ client.once('ready', () => {
     console.log('Ready!');
     const channel: TextChannel = client.channels.cache.get(environment.channel) as TextChannel;
 
-    cron.schedule('30 17 * * *', () => {
-        console.log('Running once a day at 17:30');
+    cron.schedule('0 6 * * *', () => {
+        console.log('Running once a day at 06:00');
         let thought: Thought;
         getThought().then(thought => {
             const thoughtMessage = `*Inspiration for ${moment().format('MMMM Do YYYY')}*\n>>> **${thought.topic}**\n${thought.text}`;
