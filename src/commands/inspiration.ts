@@ -2,7 +2,7 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Thursday, 2022-07-21 11:50
+ * Last Modified: Thursday, 2022-07-21 13:53
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
@@ -37,7 +37,7 @@ export async function getRssThought(): Promise<Thought> {
     let parser = new Parser();
     const thought = parser.parseURL('https://www.thoughtfortoday.org.uk/feed/atom').then(resp => {
 
-        const dom = new JSDOM(resp.items[2].content);
+        const dom = new JSDOM(resp.items[0].content);
         const images = dom.window.document.getElementsByTagName('img');
         const paragraphs = dom.window.document.getElementsByTagName('p');
         let txt = '';
@@ -46,7 +46,7 @@ export async function getRssThought(): Promise<Thought> {
             console.log(' ' + p.textContent);
             txt += "\n\n" + p.textContent;
         }
-        return { topic: resp.items[2].title, image: images[0].src, text: txt, date: new Date(), language: 'en' } as Thought;
+        return { topic: resp.items[0].title, image: images[0].src, text: txt, date: new Date(), language: 'en' } as Thought;
     });
     return thought;
 }
