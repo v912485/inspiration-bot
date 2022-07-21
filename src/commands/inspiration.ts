@@ -2,12 +2,14 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Thursday, 2022-07-14 14:42
+ * Last Modified: Thursday, 2022-07-21 11:50
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
  */
 import axios from 'axios';
+import Parser from 'rss-parser';
+import { JSDOM } from 'jsdom';
 
 export interface Thought {
     topic: string
@@ -16,7 +18,7 @@ export interface Thought {
     date: Date
     language: string
 }
-
+/*
 export default async (): Promise<Thought> => {
 
     const { data, status } = await axios.get<Thought>(
@@ -29,14 +31,22 @@ export default async (): Promise<Thought> => {
       );
       //console.log(JSON.stringify(data));
       return data;
-};
-/*
-export async function rssThoughts (url: string): Promise<void> {
-    const feed = new RSSParser().parseURL(url);
-    
-    console.log((await feed).title);
+};*/
 
-    (await feed).items.forEach((item) => {
-        console.log(`${item.title} - ${item.link}\n${item.content}\n\n`);
+export async function getRssThought(): Promise<Thought> {
+    let parser = new Parser();
+    const thought = parser.parseURL('https://www.thoughtfortoday.org.uk/feed/atom').then(resp => {
+
+        const dom = new JSDOM(resp.items[2].content);
+        const images = dom.window.document.getElementsByTagName('img');
+        const paragraphs = dom.window.document.getElementsByTagName('p');
+        let txt = '';
+        let i = 0;
+        for (let p of paragraphs) {
+            console.log(' ' + p.textContent);
+            txt += "\n\n" + p.textContent;
+        }
+        return { topic: resp.items[2].title, image: images[0].src, text: txt, date: new Date(), language: 'en' } as Thought;
     });
-}*/
+    return thought;
+}

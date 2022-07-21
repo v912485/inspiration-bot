@@ -2,15 +2,15 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Saturday, 2022-07-16 7:48
+ * Last Modified: Thursday, 2022-07-21 11:49
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
  */
-import { Client, Intents, CommandInteractionOptionResolver, TextChannel, Message, MessageEmbed } from 'discord.js';
+import { Client, Intents, TextChannel, MessageEmbed } from 'discord.js';
 import moment from 'moment';
-import{ environment } from './bot-config';
-import getThought, { Thought } from './commands/inspiration';
+import { environment } from './bot-config';
+import { getRssThought, Thought } from './commands/inspiration';
 import cron from 'node-cron';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
@@ -22,14 +22,18 @@ client.once('ready', () => {
     cron.schedule('0 6 * * *', () => {
         console.log('Running once a day at 06:00');
         let thought: Thought;
-        getThought().then(thought => {
-            const thoughtMessage = `*Inspiration for ${moment().format('MMMM Do YYYY')}*\n>>> **${thought.topic}**\n${thought.text}`;
-            channel.send(thoughtMessage);
-            console.log("Image: " + thought.image);
-            console.log("Topic: " + thought.topic);
-            console.log("Text: " + thought.text);
+        getRssThought().then(thought => {
+            const thoughtMessage = `*Inspiration for ${moment().format('MMMM Do YYYY')}*`;
+            console.log('Sending message');
+            const embedMessage = new MessageEmbed()
+                .setColor('#02bfbf')
+                .setTitle(thought.topic)
+                .setImage(thought.image)
+                .setDescription(thought.text)
+            //setThumbnail(thought.image);
+            channel.send({ content: thoughtMessage, embeds: [embedMessage] });
         });
-      });
+    });
 });
 
 client.login(environment.token);
@@ -44,9 +48,16 @@ client.on('interactionCreate', async interaction => {
     const { commandName } = interaction;
 
     if (commandName === 'inspiration') {
-        getThought().then(thought => {
-            const thoughtMessage = `*Inspiration for ${moment().format('MMMM Do YYYY')}*\n>>> **${thought.topic}**\n${thought.text}`;
-            interaction.reply(thoughtMessage);
+        getRssThought().then(thought => {
+            const thoughtMessage = `*Inspiration for ${moment().format('MMMM Do YYYY')}*`;
+            console.log('Sending message');
+            const embedMessage = new MessageEmbed()
+                .setColor('#02bfbf')
+                .setTitle(thought.topic)
+                .setImage(thought.image)
+                .setDescription(thought.text)
+            //setThumbnail(thought.image);
+            interaction.reply({ content: thoughtMessage, embeds: [embedMessage] });
         });
     }
 });
