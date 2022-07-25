@@ -46,7 +46,7 @@ export async function getRssThought(): Promise<Thought> {
             console.log(' ' + p.textContent);
             txt += "\n\n" + p.textContent;
         }
-        return { topic: resp.items[0].title, image: images[0].src, text: txt, date: new Date(), language: 'en' } as Thought;
+        return { topic: resp.items[0].title, image: images[0].src, text: txt, date: new Date(resp.items[0].updated), language: 'en' } as Thought;
     });
     return thought;
 }
