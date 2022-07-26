@@ -2,7 +2,7 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Thursday, 2022-07-21 11:49
+ * Last Modified: Tuesday, 2022-07-26 7:55
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
@@ -31,7 +31,7 @@ client.once('ready', () => {
                     .setColor('#02bfbf')
                     .setTitle(thought.topic)
                     .setImage(thought.image)
-                    .setDescription(thought.text)
+                    .setDescription(thought.text);
                 channel.send({ content: thoughtMessage, embeds: [embedMessage] });
                 lastDate = thoughtDate;
             }

@@ -2,7 +2,7 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Thursday, 2022-07-21 13:53
+ * Last Modified: Tuesday, 2022-07-26 7:56
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
@@ -40,13 +40,14 @@ export async function getRssThought(): Promise<Thought> {
         const dom = new JSDOM(resp.items[0].content);
         const images = dom.window.document.getElementsByTagName('img');
         const paragraphs = dom.window.document.getElementsByTagName('p');
+        console.log(resp.items[0].title);
         let txt = '';
         let i = 0;
         for (let p of paragraphs) {
             console.log(' ' + p.textContent);
             txt += "\n\n" + p.textContent;
         }
-        return { topic: resp.items[0].title, image: images[0].src, text: txt, date: new Date(resp.items[0].updated), language: 'en' } as Thought;
+        return { topic: resp.items[0].title, image: images[0].src, text: txt, date: new Date(resp.items[0].isoDate!), language: 'en' } as Thought;
     });
     return thought;
 }
