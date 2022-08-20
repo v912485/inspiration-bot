@@ -2,14 +2,14 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Tuesday, 2022-07-26 7:55
+ * Last Modified: Saturday, 2022-08-20 10:47
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
  */
 import { Client, Intents, TextChannel, MessageEmbed } from 'discord.js';
 import { environment } from './bot-config';
-import { getRssThought, Thought } from './commands/inspiration';
+import getThought, { getRssThought, Thought } from './commands/inspiration';
 import cron from 'node-cron';
 import { DateTime as dateTime} from 'luxon';
 
@@ -22,7 +22,7 @@ client.once('ready', () => {
 
     cron.schedule('*/30 6-12 * * *', () => {
         console.log('Running at ' + dateTime.now().toLocaleString(dateTime.DATETIME_SHORT));
-        getRssThought().then(thought => {
+        getThought().then(thought => {
             let thoughtDate = dateTime.fromJSDate(thought.date).toISODate();
             if (thoughtDate !== lastDate) {
                 const thoughtMessage = `*Inspiration for ${dateTime.fromJSDate(thought.date).toLocaleString(dateTime.DATE_FULL)}*`;

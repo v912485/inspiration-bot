@@ -2,7 +2,7 @@
  * Created Date: Wednesday July 13th 2022
  * Author: Allan Schweitz
  * -----
- * Last Modified: Tuesday, 2022-07-26 7:56
+ * Last Modified: Saturday, 2022-08-20 10:24
  * Modified By: Allan Schweitz
  * -----
  * Copyright (c) 2022 Onepoint
@@ -32,6 +32,20 @@ export default async (): Promise<Thought> => {
       //console.log(JSON.stringify(data));
       return data;
 };*/
+
+export default async (): Promise<Thought> => {
+
+    const { data, status } = await axios.get<any>(
+        'https://admin.thelighthouse.world/lighthouse/reflectionOfToday',
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+        },
+      );
+      //console.log(JSON.stringify(data));
+      return { topic: data.title, image: data.featuredImage, text: data.content, date: new Date(data.day), language: data.language } as Thought;
+};
 
 export async function getRssThought(): Promise<Thought> {
     let parser = new Parser();
