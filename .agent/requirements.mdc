@@ -1,0 +1,12 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project description
+This is a server side process that fetches an image and a text from the a remote server and posts it to a Google Chat space at a daily interval.
+
+# Requirements
+Use Typescript
+Use Node.js
+Use Google Chat API

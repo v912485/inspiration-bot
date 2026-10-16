@@ -2,4 +2,10 @@ node_modules
 src/bot-config.ts
 dist
 .env
-inspiration-bot-ng-*.json
+coverage
+
+# Service-account keys and other credentials downloaded as JSON
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
