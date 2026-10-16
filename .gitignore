@@ -1,2 +1,5 @@
 node_modules
 src/bot-config.ts
+dist
+.env
+inspiration-bot-ng-*.json
