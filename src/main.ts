@@ -7,60 +7,42 @@
  * -----
  * Copyright (c) 2022 Onepoint
  */
-import { Client, Intents, TextChannel, MessageEmbed } from 'discord.js';
-import { environment } from './bot-config';
-import getThought, { getRssThought, Thought } from './commands/inspiration';
+import 'dotenv/config';
 import cron from 'node-cron';
-import { DateTime as dateTime} from 'luxon';
+import { createApp } from './app';
+import { chatAddOnServiceAccount, googleIdTokenVerifier } from './auth';
+import { loadConfigOrExit } from './config';
+import { createDailyPoster, logPostFailure } from './daily-post';
+import { GoogleChatClient } from './google-chat-client';
+import { fetchThought } from './thought';
+import { logger } from './utils/logger';
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
+const config = loadConfigOrExit();
 
-client.once('ready', () => {
-    console.log('Ready!');
-    const channel: TextChannel = client.channels.cache.get(environment.channel) as TextChannel;
-    let lastDate: string = dateTime.now().toISODate(); //moment().format('YYYY-MM-DD');
-
-    cron.schedule('*/30 6-12 * * *', () => {
-        console.log('Running at ' + dateTime.now().toLocaleString(dateTime.DATETIME_SHORT));
-        getThought().then(thought => {
-            let thoughtDate = dateTime.fromJSDate(thought.date).toISODate();
-            if (thoughtDate !== lastDate) {
-                const thoughtMessage = `*Inspiration for ${dateTime.fromJSDate(thought.date).toLocaleString(dateTime.DATE_FULL)}*`;
-                console.log('Sending message');
-                const embedMessage = new MessageEmbed()
-                    .setColor('#02bfbf')
-                    .setTitle(thought.topic)
-                    .setImage(thought.image)
-                    .setDescription(thought.text);
-                channel.send({ content: thoughtMessage, embeds: [embedMessage] });
-                lastDate = thoughtDate;
-            }
-        });
-    });
+const postDailyInspiration = createDailyPoster({
+    chat: new GoogleChatClient(config.credentials, config.spaceId),
+    fetchThought,
+    timezone: config.timezone,
 });
 
-client.login(environment.token);
+const app = createApp({
+    fetchThought,
+    postDailyInspiration,
+    verifyChatToken: googleIdTokenVerifier(config.chatEndpointUrl, chatAddOnServiceAccount(config.projectNumber)),
+    verifySchedulerToken: config.task && googleIdTokenVerifier(config.task.audience, config.task.invokerEmail),
+});
 
-//client.on('messageCreate', async (message) => {
-//    if (!message.author.bot) await message.reply('echo: ' + message.content);
-//});
+if (config.cronSchedule) {
+    cron.schedule(config.cronSchedule, () => postDailyInspiration().catch(logPostFailure), {
+        timezone: config.timezone,
+        noOverlap: true,
+    });
+    logger.info(`In-process schedule enabled: ${config.cronSchedule} (${config.timezone})`);
+}
+if (!config.cronSchedule && !config.task) {
+    logger.warn('No schedule configured, so nothing will be posted automatically. Set TASK_AUDIENCE and TASK_INVOKER_EMAIL for Cloud Scheduler, or CRON_SCHEDULE.');
+}
 
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-
-    const { commandName } = interaction;
-
-    if (commandName === 'inspiration') {
-        getRssThought().then(thought => {
-            const thoughtMessage = `*Inspiration for ${dateTime.fromJSDate(thought.date).toLocaleString(dateTime.DATE_FULL)}*`;
-            console.log('Sending message');
-            const embedMessage = new MessageEmbed()
-                .setColor('#02bfbf')
-                .setTitle(thought.topic)
-                .setImage(thought.image)
-                .setDescription(thought.text)
-            //setThumbnail(thought.image);
-            interaction.reply({ content: thoughtMessage, embeds: [embedMessage] });
-        });
-    }
+app.listen(config.port, () => {
+    logger.info(`Inspiration bot running on port ${config.port}`);
 });

@@ -1,2 +1,10 @@
 node_modules
-src/bot-config.ts
+.env
+dist
+coverage
+
+# Service-account keys and other credentials downloaded as JSON
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
